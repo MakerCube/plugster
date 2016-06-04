@@ -2,6 +2,7 @@ import React,{ Component } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   TextInput,
   TouchableHighlight,
@@ -12,14 +13,44 @@ import Login from './login';
 export default class Splash extends Component {
   constructor(props){
     super(props);
+    this.state = {
+      location: null,
+      error: false
+    }
     console.log('Splash component renders!')
   }
 
+  componentDidMount(){
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        let location = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          altitude: position.coords.altitude,
+          time: position.timestamp
+        }
+        console.log('location object is : ',location);
+        this.setState({location});
+        this.props.navigator.push({
+          title: 'Login',
+          component: Login,
+          passProps: {location: this.state.location}
+        });
+      },
+      (error) => {
+        console.log('error from nagivator.geolocation is : ',error)
+        alert(error.message);
+        this.setState({ error: true });
+      },
+      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
+    );
+  }
+
   handlePress() {
-    this.props.navigator.push({
-      title: 'Login',
-      component: Login
-    });
+    // this.props.navigator.push({
+    //   title: 'Login',
+    //   component: Login
+    // });
   }
 
   render() {
@@ -29,21 +60,22 @@ export default class Splash extends Component {
           style={styles.button}
           onPress={() => this.handlePress()}
           underlayColor="white">
-            <Text style={styles.buttonText}> ENTER </Text>
+            <Image source={require('../assets/plugsterLoad.gif')} />
         </TouchableHighlight>
       </View>
     );
   }
 };
 
+// <Text style={styles.buttonText}> ENTER </Text>
+
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    padding: 30,
     marginTop: 65,
     flexDirection: 'column',
     justifyContent: 'center',
-    backgroundColor: '#48BBEC'
+    backgroundColor: '#FFF'
   },
   container: {
     flex: 1,
@@ -62,7 +94,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   button: {
-    height: 45,
     flexDirection: 'row',
     backgroundColor: 'white',
     borderColor: 'white',

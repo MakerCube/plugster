@@ -9,6 +9,7 @@ import {
   ActivityIndicatorIOS
 } from 'react-native';
 import Locator from './locator';
+import API from '../utils/api';
 
 const PickerItemIOS = PickerIOS.Item;
 
@@ -25,11 +26,18 @@ export default class Login extends Component {
 
   handleSubmit(){
     console.log('handleSubmit fired!');
-    this.props.navigator.push({
-      title: 'Finding Plug!',
-      component: Locator,
-      passProps: {floor: this.state.floor}
-    });
+    API.getPlugs()
+      .then(response => {
+        console.log('response from API.getPlugs: ',response);
+        this.props.navigator.push({
+          title: 'Finding Plug!',
+          component: Locator,
+          passProps: {floor: this.state.floor}
+        });
+      })
+      .catch(error => {
+        console.log('error in API.getPlugs: ',error);
+      })
   }
 
 	render(){
