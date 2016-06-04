@@ -2,6 +2,7 @@ import React,{ Component } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   TextInput,
   TouchableHighlight,
@@ -13,6 +14,18 @@ export default class Splash extends Component {
   constructor(props){
     super(props);
     console.log('Splash component renders!')
+  }
+
+  componentDidMount(){
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log('position is : ',position);
+        var initialPosition = JSON.stringify(position);
+        this.setState({initialPosition});
+      },
+      (error) => alert(error.message),
+      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
+    );
   }
 
   handlePress() {
@@ -29,21 +42,22 @@ export default class Splash extends Component {
           style={styles.button}
           onPress={() => this.handlePress()}
           underlayColor="white">
-            <Text style={styles.buttonText}> ENTER </Text>
+            <Image source={require('../assets/plugsterLoad.gif')} />
         </TouchableHighlight>
       </View>
     );
   }
 };
 
+// <Text style={styles.buttonText}> ENTER </Text>
+
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    padding: 30,
     marginTop: 65,
     flexDirection: 'column',
     justifyContent: 'center',
-    backgroundColor: '#48BBEC'
+    backgroundColor: '#FFF'
   },
   container: {
     flex: 1,
@@ -62,7 +76,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   button: {
-    height: 45,
     flexDirection: 'row',
     backgroundColor: 'white',
     borderColor: 'white',
