@@ -15,7 +15,7 @@ const PickerItemIOS = PickerIOS.Item;
 
 const FLOORS = [1,2,3];
 
-export default class Login extends Component {
+export default class Finder extends Component {
   constructor(props){
     super(props);
 
@@ -32,7 +32,11 @@ export default class Login extends Component {
         this.props.navigator.push({
           title: 'Finding Plug!',
           component: Locator,
-          passProps: {floor: this.state.floor}
+          passProps: {
+            floor: this.state.floor,
+            plugs: response.devices,
+            location: this.props.location
+          }
         });
       })
       .catch(error => {

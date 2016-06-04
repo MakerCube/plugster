@@ -1,18 +1,23 @@
-var M2X = require('./m2xclient');
-const m2xClient = new M2X('21545dbb3a70e5853e810ce7c57c89b0');
+const M2X_KEY = 'e9fb8386815eb7db7bbe9cb5386414fe';
+const HEADERS = {
+	'Content-Type': 'application/json',
+	'X-M2X-KEY': M2X_KEY
+};
 
 module.exports = {
 	getPlugs() {
-		return new Promise((resolve,reject) => {
-			m2xClient.devices.list(function(response) {
-		    if (response.isSuccess()) {
-		    	resolve(response);
-		    } else {
-	        console.log(JSON.stringify(response.error()));
-	        reject({ error: 'Could not fetch devices!' });
-		    }
-			});
+		return fetch(`https://api-m2x.att.com/v2/devices`, {
+			method: 'GET',
+			headers: {
+				'X-M2X-KEY': M2X_KEY,
+				'Content-Type': 'application/json'
+			}
 		})
-		
+		.then(response => {
+			return response.json();
+		})
+		.catch(error => {
+			console.log('error is : ',error);
+		})		
 	}
 }

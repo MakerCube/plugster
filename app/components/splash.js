@@ -4,11 +4,9 @@ import {
   Text,
   Image,
   StyleSheet,
-  TextInput,
-  TouchableHighlight,
   ActivityIndicatorIOS
 } from 'react-native';
-import Login from './login';
+import Finder from './finder';
 
 export default class Splash extends Component {
   constructor(props){
@@ -17,7 +15,6 @@ export default class Splash extends Component {
       location: null,
       error: false
     }
-    console.log('Splash component renders!')
   }
 
   componentDidMount(){
@@ -31,43 +28,45 @@ export default class Splash extends Component {
         }
         console.log('location object is : ',location);
         this.setState({location});
-        this.props.navigator.push({
-          title: 'Login',
-          component: Login,
-          passProps: {location: this.state.location}
-        });
+        setTimeout(()=>{
+          this.props.navigator.push({
+            title: 'Finder',
+            component: Finder,
+            passProps: {location: this.state.location}
+          });
+        },2000);
       },
       (error) => {
         console.log('error from nagivator.geolocation is : ',error)
         alert(error.message);
-        this.setState({ error: true });
+        let location = {
+          lat: 34.019222,
+          lon: -118.494222,
+          altitude: 500,
+          time: 1465077266513.315
+        }
+        this.setState({location});
+        setTimeout(()=>{
+          this.props.navigator.push({
+            title: 'Finder',
+            component: Finder,
+            passProps: {location: this.state.location}
+          });
+        },2000);
       },
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
     );
   }
 
-  handlePress() {
-    // this.props.navigator.push({
-    //   title: 'Login',
-    //   component: Login
-    // });
-  }
-
   render() {
     return (
       <View style={styles.mainContainer}>
-        <TouchableHighlight
-          style={styles.button}
-          onPress={() => this.handlePress()}
-          underlayColor="white">
-            <Image source={require('../assets/plugsterLoad.gif')} />
-        </TouchableHighlight>
+        <Image source={require('../assets/plugsterLoad.gif')} />
       </View>
     );
   }
 };
 
-// <Text style={styles.buttonText}> ENTER </Text>
 
 const styles = StyleSheet.create({
   mainContainer: {
@@ -77,36 +76,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#FFF'
   },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
   welcome: {
     fontSize: 20,
     textAlign: 'center',
     margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-  button: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    borderColor: 'white',
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 10,
-    marginTop: 10,
-    alignSelf: 'stretch',
-    justifyContent: 'center'
-  },
-  buttonText: {
-    fontSize: 18,
-    color: '#111',
-    alignSelf: 'center'
   },
 });
