@@ -26,7 +26,7 @@ export default class Finder extends Component {
 
   handleSubmit(){
     console.log('handleSubmit fired!');
-    API.getPlugs()
+    API.getOpenPlugsOnFloor(this.state.floor)
       .then(response => {
         console.log('response from API.getPlugs: ',response);
         this.props.navigator.push({
@@ -42,6 +42,22 @@ export default class Finder extends Component {
       .catch(error => {
         console.log('error in API.getPlugs: ',error);
       })
+    // API.getPlugs()
+    //   .then(response => {
+    //     console.log('response from API.getPlugs: ',response);
+    //     this.props.navigator.push({
+    //       title: 'Finding Plug!',
+    //       component: Locator,
+    //       passProps: {
+    //         floor: this.state.floor,
+    //         plugs: response.devices,
+    //         location: this.props.location
+    //       }
+    //     });
+    //   })
+    //   .catch(error => {
+    //     console.log('error in API.getPlugs: ',error);
+    //   })
   }
 
 	render(){

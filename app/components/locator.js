@@ -11,28 +11,46 @@ import {
 } from 'react-native';
 
 const closestPlug = (userLocation, plugArray) => {
-  return plugArray.reduce((closest,plug,index,plugs) => {
-    var latDeltaOLD = (Math.pow((userLocation.lat- closest.location.latitude)),2)
-    var lonDeltaOLD = (Math.pow((userLocation.lon- closest.location.longitude)),2)
-    var latDeltaNEW = (Math.pow((userLocation.lat- plug.location.latitude)),2)
-    var lonDeltaNEW = (Math.pow((userLocation.lon- plug.location.longitude)),2)
-    if(Math.sqrt((Math.pow((userLocation.lat- closest.location.latitude)),2)+(Math.pow((userLocation.lon- closest.location.longitude)),2)) >= Math.sqrt((Math.pow((userLocation.lat- plug.location.latitude)),2)+(Math.pow((userLocation.lon- plug.location.longitude)),2))){
-      return closest;
-    } else {
-      return plug;
-    }
+
+  return new Promise(resolve => {
+    var promisedDistances = plugArray.map((plug)=>{
+      return new Promise(resolve => {
+        let latPow = Math.pow((userLocation.lat - plug.location.latitude),2);
+        let lonPow = Math.pow((userLocation.lat - plug.location.longitude),2);
+        plug.distance = Math.sqrt(latPow+lonPow)
+        resolve(plug);
+      });
+    });
+
+    resolve(Promise.all(promisedDistances).then(response => {
+      return response.reduce((accumulator,current)=> {
+        return accumulator.distance > current.distance ? current : accumulator;
+      })
+    }))
   })
+  
 }
 
 export default class Locator extends Component {
   constructor(props){
     super(props);
-    console.log('props passed into Locator are : ',props);
     this.state = {
       floor: props.floor,
       plugs: props.plugs,
-      location: props.location
+      location: props.location,
+      closest: {
+        name: ''
+      }
     }
+
+  }
+
+  componentWillMount(){
+    closestPlug(this.state.location,this.props.plugs).then(response => {
+      this.setState({
+        closest: response
+      })
+    })
   }
 
   render(){
@@ -42,15 +60,13 @@ export default class Locator extends Component {
         return item.location.latitude && item.location.longitude;
       })
       .map((item, index) => {
-        console.log('item in plugs.map is : ',item);
         return { 
           latitude: item.location.latitude, 
           longitude: item.location.longitude,
           title: item.name
         };
       });
-    let closest = closestPlug(this.state.location,plugs);
-    console.log('result of closestPlug function : ',closestPlug(this.state.location,plugs));
+
     return (
       <View style={styles.container}>
         <MapView
@@ -61,23 +77,13 @@ export default class Locator extends Component {
           region={{latitude: this.props.location.lat, longitude: this.props.location.lon, latitudeDelta: 0.0005,longitudeDelta: 0.0006}}>
         </MapView>
         <View style={styles.textWrapper}>
-          <Text style={styles.title}>Currently searching on floor: {this.props.floor}</Text>
-          <Text>The closest open plug is {closest.name.substring(0,closest.name.length - 5)}</Text>
+          <Text style={styles.title}>Currently searching on floor: <Text style={styles.highlight}>{this.props.floor}</Text></Text>
+          <Text style={styles.subtitle}>The closest open plug is <Text style={styles.highlight}>{this.state.closest.name}!</Text></Text>
         </View>
       </View>
     )
   }
 };
-
-// return (
-//   <View key={index}>
-//     <View style={styles.rowContainer}>
-//       <Text>Name: {item.name}, Status: {item.status}</Text>
-//       <Text>Room: {item.location.name}</Text>
-//       <Text>Latitude: {item.location.latitude}, Longitude: {item.location.longitude}</Text>
-//     </View>
-//   </View>
-// )
 
 const styles = StyleSheet.create({
   container: {
@@ -101,9 +107,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   title: {
-    marginBottom: 20,
+    marginBottom: 10,
     fontSize: 25,
     textAlign: 'center',
+    color: '#000'
+  },
+  subtitle: {
+    marginBottom: 10,
+    fontSize: 20,
+    textAlign: 'center',
+    color: '#000'
+  },
+  highlight: {
     color: '#48BBEC'
   },
   buttonText: {
