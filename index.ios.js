@@ -1,5 +1,5 @@
+'use strict';
 import React, { Component } from 'react';
-import Splash from './App/Components/splash';
 import {
   AppRegistry,
   StyleSheet,
@@ -7,8 +7,9 @@ import {
   NavigatorIOS,
   View
 } from 'react-native';
+import Splash from './app/components/splash';
 
-class plugster extends Component {
+class Plugster extends Component {
   render() {
     return (
       <NavigatorIOS
@@ -24,10 +25,8 @@ class plugster extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F5FCFF',
   }
 });
 
-AppRegistry.registerComponent('plugster', () => plugster);
+AppRegistry.registerComponent('plugster', () => Plugster);

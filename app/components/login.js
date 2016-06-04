@@ -1,5 +1,6 @@
-import React, {
-  Component,
+import React,{ Component } from 'react';
+import {
+  PickerIOS,
   View,
   Text,
   StyleSheet,
@@ -7,29 +8,51 @@ import React, {
   TouchableHighlight,
   ActivityIndicatorIOS
 } from 'react-native';
+import Locator from './locator';
+
+const PickerItemIOS = PickerIOS.Item;
+
+const FLOORS = [1,2,3];
 
 export default class Login extends Component {
+  constructor(props){
+    super(props);
+
+    this.state = {
+      floor: 1
+    }
+  }
+
+  handleSubmit(){
+    console.log('handleSubmit fired!');
+    this.props.navigator.push({
+      title: 'Finding Plug!',
+      component: Locator,
+      passProps: {floor: this.state.floor}
+    });
+  }
 
 	render(){
     return (
       <View style={styles.mainContainer}>
-        <Text style={styles.title}> Search for a Github User </Text>
-        <TextInput
-          style={styles.searchInput}
-          value={this.state.username}
-          onChange={event => this.handleChange(event)} />
+        <Text style={styles.title}> Please choose your floor: </Text>
+        <PickerIOS
+          selectedValue={this.state.floor}
+          onValueChange={floor => this.setState({floor: floor})}>
+          {FLOORS.map(floor => (
+            <PickerItemIOS
+              key={floor}
+              value={floor}
+              label={`Floor ${floor}`}
+              />
+          ))}
+        </PickerIOS>
         <TouchableHighlight
           style={styles.button}
           onPress={() => this.handleSubmit()}
           underlayColor="white">
-            <Text style={styles.buttonText}> SEARCH </Text>
+            <Text style={styles.buttonText}> PLUG ME! </Text>
         </TouchableHighlight>
-        <ActivityIndicatorIOS
-          animating={this.state.isLoading}
-          color="#111"
-          size="large"
-        />
-        {showErr}
       </View>
     );
 	}

@@ -1,5 +1,5 @@
-import React, {
-  Component,
+import React,{ Component } from 'react';
+import {
   View,
   Text,
   StyleSheet,
@@ -12,6 +12,7 @@ import Login from './login';
 export default class Splash extends Component {
   constructor(props){
     super(props);
+    console.log('Splash component renders!')
   }
 
   handlePress() {
@@ -26,9 +27,9 @@ export default class Splash extends Component {
       <View style={styles.mainContainer}>
         <TouchableHighlight
           style={styles.button}
-          onPress={() => this.handleSubmit()}
+          onPress={() => this.handlePress()}
           underlayColor="white">
-            <Text style={styles.buttonText}> SEARCH </Text>
+            <Text style={styles.buttonText}> ENTER </Text>
         </TouchableHighlight>
       </View>
     );
