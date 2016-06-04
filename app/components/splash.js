@@ -13,26 +13,44 @@ import Login from './login';
 export default class Splash extends Component {
   constructor(props){
     super(props);
+    this.state = {
+      location: null,
+      error: false
+    }
     console.log('Splash component renders!')
   }
 
   componentDidMount(){
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        console.log('position is : ',position);
-        var initialPosition = JSON.stringify(position);
-        this.setState({initialPosition});
+        let location = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          altitude: position.coords.altitude,
+          time: position.timestamp
+        }
+        console.log('location object is : ',location);
+        this.setState({location});
+        this.props.navigator.push({
+          title: 'Login',
+          component: Login,
+          passProps: {location: this.state.location}
+        });
       },
-      (error) => alert(error.message),
+      (error) => {
+        console.log('error from nagivator.geolocation is : ',error)
+        alert(error.message);
+        this.setState({ error: true });
+      },
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
     );
   }
 
   handlePress() {
-    this.props.navigator.push({
-      title: 'Login',
-      component: Login
-    });
+    // this.props.navigator.push({
+    //   title: 'Login',
+    //   component: Login
+    // });
   }
 
   render() {
