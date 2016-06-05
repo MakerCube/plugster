@@ -52,7 +52,7 @@ export default class Splash extends Component {
             component: Finder,
             passProps: {location: this.state.location}
           });
-        },2000);
+        },3000);
       },
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
     );

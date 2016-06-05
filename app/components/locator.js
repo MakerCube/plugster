@@ -4,31 +4,31 @@ import {
   ScrollView,
   View,
   Text,
+  Image,
   StyleSheet,
   TextInput,
   TouchableHighlight,
   MapView
 } from 'react-native';
+import API from '../utils/api';
+
 
 const closestPlug = (userLocation, plugArray) => {
-
   return new Promise(resolve => {
     var promisedDistances = plugArray.map((plug)=>{
       return new Promise(resolve => {
         let latPow = Math.pow((userLocation.lat - plug.location.latitude),2);
-        let lonPow = Math.pow((userLocation.lat - plug.location.longitude),2);
+        let lonPow = Math.pow((userLocation.lon - plug.location.longitude),2);
         plug.distance = Math.sqrt(latPow+lonPow)
         resolve(plug);
       });
     });
-
     resolve(Promise.all(promisedDistances).then(response => {
       return response.reduce((accumulator,current)=> {
         return accumulator.distance > current.distance ? current : accumulator;
       })
     }))
-  })
-  
+  }) 
 }
 
 export default class Locator extends Component {
@@ -42,7 +42,6 @@ export default class Locator extends Component {
         name: ''
       }
     }
-
   }
 
   componentWillMount(){
@@ -53,18 +52,87 @@ export default class Locator extends Component {
     })
   }
 
+  componentDidMount(){
+    this.state.plugs.forEach((plug,index) => {
+      API.getStatusOfPlug(plug)
+        .then(response => {
+          console.log('response with plug.id: ',plug.id,' is : ',response);
+          let updated = this.state.plugs.slice();
+          updated[index] = response;
+          this.setState({
+            plugs: updated
+          })
+        })
+    })
+    setInterval(()=>{
+      this.state.plugs.forEach((plug,index) => {
+        API.getStatusOfPlug(plug)
+          .then(response => {
+            console.log('response with plug.id: ',plug.id,' is : ',response);
+            let updated = this.state.plugs.slice();
+            updated[index] = response;
+            this.setState({
+              plugs: updated
+            })
+          })
+      })
+    },1000)
+  }
+
+  componentDidUpdate(){
+    console.log('this.state.plugs is now : ',this.state.plugs);
+    
+    let filtered = new Promise(resolve => {
+      var newArray = this.props.plugs.filter(plug => {
+        if(plug.streams && (!parseInt(plug.streams[1].value) || !parseInt(plug.streams[3].value))){
+          return plug;
+        }
+      });
+      resolve(newArray);
+    }).then(res => {
+      console.log('res passed in is : ',res);
+      if(res.length > 0){
+        closestPlug(this.state.location,res).then(response => {
+          this.setState({
+            closest: response
+          })
+        })
+      }
+    })
+    
+  }
+
   render(){
     const { plugs } = this.props;
-    let plugMarkers = plugs
+
+    let plugMarkers = this.state.plugs
       .filter(item => {
         return item.location.latitude && item.location.longitude;
       })
       .map((item, index) => {
-        return { 
-          latitude: item.location.latitude, 
-          longitude: item.location.longitude,
-          title: item.name
-        };
+        if(item.streams && item.streams.length > 0 && !parseInt(item.streams[1].value) && !parseInt(item.streams[3].value)){
+          return { 
+            latitude: item.location.latitude, 
+            longitude: item.location.longitude,
+            title: item.name,
+            subtitle: 'Two plugs available!'
+          };
+        } else if (item.streams && item.streams.length > 0 && (!parseInt(item.streams[1].value) || !parseInt(item.streams[3].value))) {
+          return { 
+            latitude: item.location.latitude, 
+            longitude: item.location.longitude,
+            title: item.name,
+            subtitle: 'One plug available!'
+          };
+        } else {
+          return { 
+            latitude: item.location.latitude, 
+            longitude: item.location.longitude,
+            title: item.name,
+            subtitle: 'No plugs available...'
+          };
+        }
+        
       });
 
     return (
