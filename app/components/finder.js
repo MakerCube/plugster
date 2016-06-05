@@ -26,7 +26,7 @@ export default class Finder extends Component {
 
   handleSubmit(){
     console.log('handleSubmit fired!');
-    API.getOpenPlugsOnFloor(this.state.floor)
+    API.getPlugsOnFloor(this.state.floor)
       .then(response => {
         console.log('response from API.getPlugs: ',response);
         this.props.navigator.push({

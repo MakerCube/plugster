@@ -4,14 +4,16 @@ import {
   ScrollView,
   View,
   Text,
+  Image,
   StyleSheet,
   TextInput,
   TouchableHighlight,
   MapView
 } from 'react-native';
+import API from '../utils/api';
+
 
 const closestPlug = (userLocation, plugArray) => {
-
   return new Promise(resolve => {
     var promisedDistances = plugArray.map((plug)=>{
       return new Promise(resolve => {
@@ -21,14 +23,12 @@ const closestPlug = (userLocation, plugArray) => {
         resolve(plug);
       });
     });
-
     resolve(Promise.all(promisedDistances).then(response => {
       return response.reduce((accumulator,current)=> {
         return accumulator.distance > current.distance ? current : accumulator;
       })
     }))
-  })
-  
+  }) 
 }
 
 export default class Locator extends Component {
@@ -42,7 +42,6 @@ export default class Locator extends Component {
         name: ''
       }
     }
-
   }
 
   componentWillMount(){
@@ -53,18 +52,56 @@ export default class Locator extends Component {
     })
   }
 
+  componentDidMount(){
+    this.state.plugs.forEach((plug,index) => {
+      API.getStatusOfPlug(plug)
+        .then(response => {
+          console.log('response with plug.id: ',plug.id,' is : ',response);
+          let updated = this.state.plugs.slice();
+          updated[index] = response;
+          this.setState({
+            plugs: updated
+          })
+        })
+    })
+
+  }
+
+  componentDidUpdate(){
+    console.log('this.state.plugs is now : ',this.state.plugs);
+  }
+
   render(){
     const { plugs } = this.props;
-    let plugMarkers = plugs
+
+    let plugMarkers = this.state.plugs
       .filter(item => {
         return item.location.latitude && item.location.longitude;
       })
       .map((item, index) => {
-        return { 
-          latitude: item.location.latitude, 
-          longitude: item.location.longitude,
-          title: item.name
-        };
+        if(item.streams && items.streams.length > 0 && parseInt(item.streams[1].value) && parseInt(item.streams[3].value)){
+          return { 
+            latitude: item.location.latitude, 
+            longitude: item.location.longitude,
+            title: item.name,
+            subtitle: 'Two plugs available!'
+          };
+        } else if (item.streams && items.streams.length > 0 && (parseInt(item.streams[1].value) || parseInt(item.streams[3].value))) {
+          return { 
+            latitude: item.location.latitude, 
+            longitude: item.location.longitude,
+            title: item.name,
+            subtitle: 'One plug available!'
+          };
+        } else {
+          return { 
+            latitude: item.location.latitude, 
+            longitude: item.location.longitude,
+            title: item.name,
+            subtitle: 'No plugs available...'
+          };
+        }
+        
       });
 
     return (
