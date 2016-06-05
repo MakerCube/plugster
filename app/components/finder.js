@@ -15,7 +15,7 @@ const PickerItemIOS = PickerIOS.Item;
 
 const FLOORS = [1,2,3];
 
-export default class Login extends Component {
+export default class Finder extends Component {
   constructor(props){
     super(props);
 
@@ -26,18 +26,38 @@ export default class Login extends Component {
 
   handleSubmit(){
     console.log('handleSubmit fired!');
-    API.getPlugs()
+    API.getOpenPlugsOnFloor(this.state.floor)
       .then(response => {
         console.log('response from API.getPlugs: ',response);
         this.props.navigator.push({
           title: 'Finding Plug!',
           component: Locator,
-          passProps: {floor: this.state.floor}
+          passProps: {
+            floor: this.state.floor,
+            plugs: response.devices,
+            location: this.props.location
+          }
         });
       })
       .catch(error => {
         console.log('error in API.getPlugs: ',error);
       })
+    // API.getPlugs()
+    //   .then(response => {
+    //     console.log('response from API.getPlugs: ',response);
+    //     this.props.navigator.push({
+    //       title: 'Finding Plug!',
+    //       component: Locator,
+    //       passProps: {
+    //         floor: this.state.floor,
+    //         plugs: response.devices,
+    //         location: this.props.location
+    //       }
+    //     });
+    //   })
+    //   .catch(error => {
+    //     console.log('error in API.getPlugs: ',error);
+    //   })
   }
 
 	render(){
